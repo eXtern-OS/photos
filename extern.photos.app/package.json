@@ -4,6 +4,9 @@
   "version": "0.1",
   "description": "View & explore image files.",
   "main": "index.html",
+  "wait": true,
+  "multi_window" : true,
+  "thumbnail_preview": false,
   "category" : "Images & Graphics",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

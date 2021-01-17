@@ -10,7 +10,7 @@
         <!-- CSS -->
         <link href="../../Shared/CoreCSS/bootstrap.min.css" rel="stylesheet">
         <link href="../../Shared/CoreCSS/animate.min.css" rel="stylesheet">
-        <link href="../../Shared/CoreCSS/font-awesome.min.css" rel="stylesheet">
+        <link href="../../Shared/CoreCSS/fonts/fontawesome.min.5.8.1.css" rel="stylesheet">
         <link href="../../Shared/CoreCSS/form.css" rel="stylesheet">
         <link href="../../Shared/CoreCSS/calendar.css" rel="stylesheet">
         <link href="../../Shared/CoreCSS/style.css" rel="stylesheet">
@@ -19,15 +19,21 @@
     <link href="slick.css" rel="stylesheet"> 
       <link href="slick-theme.css" rel="stylesheet">
     <link href="../../Shared/CoreCSS/app-control.css" rel="stylesheet">
+    <link href="../../Shared/CoreCSS/app-sidebar.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../../extern.explorebar/css/component.css" />
     <link href="css/photos.css" rel="stylesheet">
 
     </head>
     <body id="body_settings">
+	<div id="adaptiveImage">
+		<img src="">
+	</div>
         <!--<canvas id="bg_cover" width="1260" height="600"></canvas>-->
         <!--<div id = "bg_cover"></div>-->
         <div style="overflow-y: hidden; overflow-x:hidden;">
 
-
+	<div id="audio"></div>
+	<!--<iframe frameBorder="0" style="width: 100%; height:100%;" src="http://accounts.externos.io"></iframe>-->
             
         
         <div class="clearfix"></div>
@@ -35,7 +41,7 @@
         
         <section class="p-relative" role="main" >
             
-            <div id="welcomeView" style="text-align: center; padding-top: 10%; color: white; text-shadow: 0 0 30px rgba(0, 0, 0, 0.47);">
+            <div id="welcomeView" class="hidden" style="text-align: center; padding-top: 10%; color: white; text-shadow: 0 0 30px rgba(0, 0, 0, 0.47);">
           <p>
               <img id="appIcon" src="icon.svg" style="width: 200px">
               <!--<span style="text-shadow: 0 0 30px rgba(0, 0, 0, 0.47); color: rgba(255, 255, 255, 0.74); font-size: 120px;" class="icon">&#61955;</span>-->
@@ -51,17 +57,174 @@
 
           
       </div>
+
+      <section id="gallerySection">
+          <div class="quick-access-bar col-md-2">
+
+
+            <div class="searchbox">
+      <input id="searchInput" type="text" class="form-control input-sm" placeholder="Search">
+          <span class="icon">&#61788;</span>
+      </div>
+                
+    <ul class="nav nav-list overflow">
+
+	<div id="dropdownAnimateSearchOptions"></div>
+
+      <li class="filesSearchOption" style="display: none;">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="searchRadio" value="search-only-this-folder" checked>
+                            Search only in this folder
+                        </label>
+                    </div>
+      </li>
+      <li class="filesSearchOption" style="display: none;">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" value="deep-search" name="searchRadio">
+                            Search in all sub-folders
+                        </label>
+                    </div>
+      </li>
+
+      <li class="filesSearchOption" style="margin-top: 20px; margin-bottom: 20px; display: none;">
+                    <div class="checkbox m-b-5">
+                        <label>
+                            <input type="checkbox" disabled>
+                            Go through contents of files
+                        </label>
+                    </div>
+      </li> <!--female #61708;-->
+      <!-- female 2 #61768; -->
+      <!-- female 3 #61816; -->
+      <!--Zoom out #61724; -->
+      <!-- time1 #61725; -->
+      <!-- time 2 (real clock) #61741; -->
+      <!-- heart #61749; -->
+      <!--zoom in #61786; -->
+      <!-- Star (favourites) #61823; -->
+      <!-- Male 1 #61822; -->
+      <!-- Male 2 #61844; -->
+      <!-- Picutr Icon/nature #61862; -->
+      <!-- Male 3 use #61873; -->
+      <!-- Male 4 use #61883; -->
+      <!-- Female use #61914; -->
+      <!-- People #61887; -->
+      <!-- Sport #61935; -->
+      <!-- Sport with person #61953; -->
+      <!-- Plus #61943; -->
+      <!-- Sport 2 ball #61893; -->
+            
+      <li class="nav-header"> Categories</li>
+      <li id="stuff-picks" class="active category-optn">
+        <a href="#" onclick="goBack()"><span class="icon">&#61713;</span> All Albums</a>
+      </li>
+      <li id="MultimediaCategory" class="category-optn">
+        <a href="#" onclick="setCategory('Multimedia')"><span class="icon" >&#61823;</span> Favourites</a>
+      </li>
+      <li id="MultimediaCategory" class="category-optn">
+        <a href="#" onclick="setCategory('Multimedia')"><span class="icon" >&#61729;</span> Screenshots</a>
+      </li>
+      <li id="InternetCategory" class="category-optn">
+        <a href="#" onclick="setCategory('Internet')"><span class="icon" >&#61914;</span> You</a>
+      </li>
+      <li id="GamesCategory" class="category-optn">
+        <a href="#" onclick="setCategory('Games')"><span class="icon" >&#61887;</span> People</a>
+      </li>
+      <!--<li id="GamesCategory" class="category-optn">
+        <a href="#" onclick="setCategory('Games')"><span class="icon" >&#61953;</span> Sports</a>
+      </li>-->
+      <li id="Productivity-ToolsCategory" class="category-optn">    
+        <a href="#" onclick="setCategory('Productivity-Tools')"><span class="icon" >&#61857;</span> Nature</a>
+      </li>
+      <li class="nav-header" style="margin-top: 10px;"> Filter By </li>
+      <li id="eXternOSApps-Section" class="active filter-section">
+        <a href="#" onclick="setCategory('System-Tools')"><img src="img/icon/photos.png"> Show All</a>
+      </li>
+      <li id="LegacyApps-Section" class="filter-section">
+        <a href="#" onclick="setCategory('System-Tools')"><img src="img/icon/calendar.png"> From This Year</a>
+      </li>
+      <li id="NyikaExtensions-Section" class="filter-section">
+        <a href="#" onclick="setCategory('System-Tools')"><img src="img/icon/calendar.png"> From Last Year</a>
+      </li>
+      <li id="NyikaExtensions-Section" class="filter-section">
+        <a href="#" onclick="setCategory('System-Tools')"><span class="icon biggerIcon">&#61742;</span> <span class="labelAdjusted">Australia</span></a>
+      </li>
+      <li id="NyikaExtensions-Section" class="filter-section">
+        <a href="#" onclick="setCategory('System-Tools')"><span class="icon biggerIcon" >&#61943;</span>  <span class="labelAdjusted">Custom</span></a>
+      </li>
+      <li class="nav-header" style="margin-top: 10px;"> Settings </li>
+      <li id="System-ToolsCategory" class="category-optn">
+        <a href="#" onclick="setCategory('System-Tools')"><span class="icon" >&#61886;</span> Settings</a>
+      </li>
+      
+      <!--<li class="divider"></li>-->
+      <!--<li><a href="#" nw-call="about" onclick="App.about()"><span class="icon">&#61717;</span> Test</a></li> -->
+    </ul>
+  </div>
+
+  <div class="col-md-10">
+    <div id="allAlbums">
+      <div id="allPhotosMain" class="row">
+        <div class="col-md-9">
+          <!--featured-photos-carousel-->
+          <div id="featured-photos-carousel" class="carousel slide" data-interval="false">
+            <!-- Indicators -->
+                                    <ol class="carousel-indicators">
+                                        <!--<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                                        <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                                        <li data-target="#carousel-example-generic" data-slide-to="2"></li>-->
+                                    </ol>
+                                  
+                                    <!-- Wrapper for slides -->
+                                    <div id="innerFeaturedSlides" class="carousel-inner">
+                                    </div>
+                                    
+                                    <!-- Controls -->
+                                    <!--<a class="left carousel-control" href="#featured-photos-carousel" data-slide="prev">
+                                        <i class="icon">&#61903;</i>
+                                    </a>
+                                    <a class="right carousel-control" href="#featured-photos-carousel" data-slide="next">
+                                        <i class="icon">&#61815;</i>
+                                    </a>-->
+                                </div>
+        </div>
+        <!--<div class="col-md-3">-->
+
+
+                    
+        <!--</div>-->
+
+      </div>
+    </div>
+  </div>
+
+  
+
+      </section>
        
             
             <section id="mainView" class="container hidden">
-                
-            
-                    
 
+		<div id="topToolbar">
+      <a id="backButton" href="#" class="pull-left" onclick="openGallerySection()"><span class="icon">&#61903;</span> Albums</a>
+			<a id="editButton" href="#" class="pull-right" onclick="openEditor()"><span class="icon">&#61706;</span>Edit</a>
+      <a id="copyButton" href="#" class="pull-right normal-weight" title="Copy image to clipboard" onclick="copyImageToClipboard()"><i class="fas fa-copy"></i></a>
+      <a id="infoButton" href="#" class="pull-right"><span class="icon">&#61730;</span></a>
+      <a id="enhanceButton" href="#" class="pull-right normal-weight" title="Enhance"><i class="fa fa-adjust" aria-hidden="true"></i></a>
+      <a id="fullscreenButton" href="#" class="pull-right normal-weight" title="Toggle Fullscreen" onclick="toggleFullscreen()"><span class="icon">&#61839;</span></a>
+      <a id="playSlideshowButton" href="#" class="pull-right normal-weight" title="Play as slideshow" onclick="toggleSlideshow()"><i class="fa fa-play" aria-hidden="true"></i></a>
+      <a id="zoomOutButton" href="#" class="pull-right normal-weight" title="Zoom Out"><span class="icon">&#61724;</span></a>
+      <a id="zoomInButton" href="#" class="pull-right normal-weight" title="Zoom In"><span class="icon">&#61786;</span></a>
+		</div>
 
-                                <div id="carousel-example-generic" class="carousel slide" data-interval="false">
+		<a id="showFromScreenshotView" onclick="openFullAppFromScreenshotview()" href="#"></a>
+
+                                <!-- put it back here-->
+<div id="carousel-example-generic" class="carousel slide" data-interval="false">
                                     <!-- Indicators -->
-                                    <ol class="carousel-indicators">
+                                    <ol class="carousel-indicators carousel-indicators-full">
                                         <!--<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
                                         <li data-target="#carousel-example-generic" data-slide-to="1"></li>
                                         <li data-target="#carousel-example-generic" data-slide-to="2"></li>-->
@@ -79,6 +242,7 @@
                                         <i class="icon">&#61815;</i>
                                     </a>
                                 </div>
+                                
                             
                     
                     
@@ -129,8 +293,13 @@
         
 
             <script type="text/javascript" src="../../Shared/CoreJS/canvas_blur_rect.js"></script>
+            <!--<script src="scripts.js"></script>-->
             <script src="../../Shared/CoreJS/jquery.zoomooz.min.js"></script>
+            <script src="js/jquery.lettering.js"></script>
+            <script src="js/jquery.textillate.js"></script>
+            <script src="js/wheel-zoom.min.js"></script>
             <script src="js/photos.js"></script>
+            
         </div>
 
 
