@@ -25,6 +25,7 @@ embed {
 
 #copyButton {
     margin-top: 10px;
+    text-shadow: none;
 }
 
 .tui-colorpicker-palette-button {
@@ -43,7 +44,7 @@ embed {
 }
 
 #editButton, #backButton {
-    text-shadow: 0 0 20px rgb(0, 0, 0), 0 0 20px rgb(0, 0, 0);
+    /*text-shadow: 0 0 20px rgb(0, 0, 0), 0 0 20px rgb(0, 0, 0);*/
 }
 
 #zoomOutButton {
@@ -52,18 +53,20 @@ embed {
 
 #topToolbar .fa {
     margin-top: 10px;
-    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.5);
+    /*text-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.5);*/
+    text-shadow: none;
 }
 
 #topToolbar .icon {
-    text-shadow: 0 0 20px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 0, 0, 1);
+    /*text-shadow: 0 0 20px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 0, 0, 1);*/
+    text-shadow: none;
 }
 
 #zoomInButton, #editButton, #infoButton, #fullscreenButton {
     margin-top: 5px;
 }
 
-.carousel-inner>.active {
+#innerPhotosSlides > .active {
         cursor: grab;
     display: flex;
     align-items: center;
@@ -73,6 +76,18 @@ embed {
 #infoButton {
     font-weight: bold;
     margin-right: 30px;
+}
+
+#animateImageOnOpen {
+    position: absolute;
+}
+
+.enableSizeAnimation {
+    -webkit-transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s;
+}
+
+.animatedOpacity, #gallerySection {
+    -webkit-transition: opacity 0.5s;
 }
 
 #adaptiveImage {
@@ -144,16 +159,22 @@ margin: auto;
     top: 0;
     /* right: 20px; */
     width: 100%;
-    height: 52px;
+    height: 60px;
     z-index: 999999999;
-    /*font-weight: bold;*/
-    /*backdrop-filter: blur(20px);*/
+    /* font-weight: bold; */
+    backdrop-filter: blur(20px);
     /* background-color: #0000001c; */
     padding-right: 120px;
-    /*background: linear-gradient(#00000073,#00000038, #00000000);*/
+    /* background: linear-gradient(#00000073,#00000038, #00000000); */
     /* background-color: rgb(0 0 0 / 9%); */
     padding-top: 8px;
-    /* box-shadow: 0 0 23px rgb(0 0 0 / 58%);*/
+    /* box-shadow: 0 0 23px rgb(0 0 0 / 58%); */
+    /* padding-bottom: 10px; */
+    background-color: #00000082;
+}
+
+#backButton {
+    margin-top: 2px;
 }
 
 #showFromScreenshotView {

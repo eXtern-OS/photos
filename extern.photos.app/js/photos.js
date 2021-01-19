@@ -6,6 +6,7 @@ var filesAdded = 0;
 var wzoom;
 var slideShowInterval;
 var intervalDuration = 5000;
+var openedFromGallery = false;
 //win.showDevTools();
 
 function toggleSlideshow() {
@@ -84,11 +85,11 @@ function copyImageToClipboard() {
 
 
 App = parent.getInstance();
-$(App.close_button).css("top","16px"); //move close button to other buttons
+$(App.close_button).css("top","21px"); //move close button to other buttons
 $(App.close_button).css("margin-right","15px"); //move close button to other buttons
-$(App.maximize_button).css("top","16px"); //move maximize button to other buttons
+$(App.maximize_button).css("top","21px"); //move maximize button to other buttons
 $(App.maximize_button).css("margin-right","20px"); //move maximize button to other buttons
-$(App.minimize_button).css("top","9px"); //move minimize button to other buttons
+$(App.minimize_button).css("top","15px"); //move minimize button to other buttons
 $(App.minimize_button).css("margin-right","25px"); //move minimize button to other buttons
 
 var button = {
@@ -264,6 +265,7 @@ var preSelectedImage = false;
 
 var adjustwidth = 100;
 var adjustHeight = 100;
+var slideBackToIndex = -1;
 
 function addImage(img,customSelectFile) {
     if (customSelectFile)
@@ -271,11 +273,11 @@ function addImage(img,customSelectFile) {
     else
         $("#innerPhotosSlides").append('<div class="item"><img img-src="'+img+'" src="" alt="Image"></div>');
     if (!preSelectedImage)
-        $('.item').first().addClass('active');
+        $('#mainView  .item').first().addClass('active');
     //console.log("LENGTH",$("ol li").length);
     
     if (!preSelectedImage)
-        $("ol li").removeClass('active');
+        $("#mainView  ol li").removeClass('active');
 
 	var thumb_cache = process.env['HOME']+"/.config/hub/Default/thumbnails/videos/";
 
@@ -283,16 +285,16 @@ function addImage(img,customSelectFile) {
 
 	var fileNameOfInterest = img.replace(/^.*[\\\/]/, '');
 	if (fs.existsSync(thumb_cache+fileNameOfInterest+'-[image].png')) {
-		$(".carousel-indicators").append('<li data-target="#carousel-example-generic" data-slide-to="'+(pos-1)+'" class="imgIndicators"><img src="file://'+thumb_cache+fileNameOfInterest+'-[image].png"</li>');
+		$("#mainView .carousel-indicators").append('<li data-target="#carousel-example-generic" data-slide-to="'+(pos-1)+'" class="imgIndicators"><img src="file://'+thumb_cache+fileNameOfInterest+'-[image].png"</li>');
 	} else {
-		$(".carousel-indicators").append('<li data-target="#carousel-example-generic" data-slide-to="'+(pos-1)+'" class="imgIndicators"><img src="../extern.files.app/icons/image.png"</li>');
+		$("#mainView .carousel-indicators").append('<li data-target="#carousel-example-generic" data-slide-to="'+(pos-1)+'" class="imgIndicators"><img src="../extern.files.app/icons/image.png"</li>');
 	}
 
 
     
     if (!preSelectedImage) {
-        $(".imgIndicators").removeClass("active");
-        $(".item").removeClass("active");
+        $("#mainView .imgIndicators").removeClass("active");
+        $("#mainView .item").removeClass("active");
     }
     
     console.log("customSelectFileAAA: ",customSelectFile);
@@ -300,8 +302,29 @@ function addImage(img,customSelectFile) {
     if (customSelectFile) {
 	console.log("custom select");
         preSelectedImage = true;
-        $('.carousel-indicators > li').last().addClass('active');
-        $('.item').last().addClass('active');
+        $('#mainView .carousel-indicators > li').last().addClass('active');
+        $('#mainView .item').last().addClass('active');
+        if (openedFromGallery) {
+            $("#mainView").css("opacity",0);
+            $("#mainView").addClass("animatedOpacity");
+            setTimeout(function(){
+                $('#innerPhotosSlides > .active').addClass("switchBackTo");
+                $("#animateImageOnOpen").width($('#innerPhotosSlides > .active > img').width());
+                $("#animateImageOnOpen").height($('#innerPhotosSlides > .active > img').height());
+                $("#animateImageOnOpen").css("top",$('#innerPhotosSlides > .active > img').offset().top);
+                $("#animateImageOnOpen").css("left",$('#innerPhotosSlides > .active > img').offset().left);
+                
+                slideBackToIndex = $("#innerPhotosSlides").find('.active').index();
+
+                console.log("slideBackToIndex: ",slideBackToIndex);
+                
+            }, 200);
+
+            setTimeout(function(){ $("#mainView").css("opacity",1);},600);
+            setTimeout(function(){ $("#animateImageOnOpen").addClass("hidden");
+            $("#mainView").removeClass("animatedOpacity");
+            }, 1000);
+        }
         //new ScrollZoom($('#innerPhotosSlides > .active'),4,0.5);
         wzoom = WZoom.create('#innerPhotosSlides > .active > img', {
             minScale: 1,
@@ -566,6 +589,26 @@ screenhsotView = false; //Prevent going into mini mode
     
 }
 
+function openImage(imageElement) {
+    
+    $('#mainView .carousel-indicators').empty();
+    $("#innerPhotosSlides").empty();
+    console.log("imageElement: ",$(imageElement).offset());
+    $(".currentlyViewingImage").removeClass("currentlyViewingImage");
+    $(imageElement).addClass("currentlyViewingImage");
+    $("#animateImageOnOpen").attr("src",$(imageElement).attr("src"));
+    $("#animateImageOnOpen").removeClass("hidden");
+    $("#animateImageOnOpen").width($(imageElement).width());
+    $("#animateImageOnOpen").height($(imageElement).height());
+    $("#animateImageOnOpen").css("top",$(imageElement).offset().top);
+    $("#animateImageOnOpen").css("left",$(imageElement).offset().left);
+    $("#animateImageOnOpen").addClass("enableSizeAnimation");
+    openedFromGallery = true;
+    var files = [$(imageElement).attr("img-src")];
+    App.onOpenFiles(files); //FIXME: come here
+
+}
+
 function openEditor() {
     var width = 1490;
     var height = 860;
@@ -584,10 +627,10 @@ function addImageToLibrary(imageToAdd) {
     var pos = $("#innerFeaturedSlides").children().length;
     if (pos < 3) {
         if (pos == 0) {
-            $("#innerFeaturedSlides").append('<a href="#" class="item featured-item active"><img img-src="'+imageToAdd+'" src="file://'+imageToAdd+'" alt="Ismage"></a>');
+            $("#innerFeaturedSlides").append('<a href="#" class="item featured-item active"><img img-src="'+imageToAdd+'" onclick="openImage(this)" src="file://'+imageToAdd+'" alt="Ismage"></a>');
             $(".carousel-indicators").append('<li data-target="#featured-photos-carousel" data-slide-to="'+pos+'" class="imgIndicators active"></li>');
         } else {
-            $("#innerFeaturedSlides").append('<a href="#" class="item featured-item"><img img-src="'+imageToAdd+'" src="file://'+imageToAdd+'" alt="Ismage"></a>');
+            $("#innerFeaturedSlides").append('<a href="#" class="item featured-item"><img img-src="'+imageToAdd+'" src="file://'+imageToAdd+'" onclick="openImage(this)" alt="Ismage"></a>');
             $(".carousel-indicators").append('<li data-target="#featured-photos-carousel" data-slide-to="'+pos+'" class="imgIndicators"></li>');
         }
     
@@ -684,6 +727,25 @@ $(".photo-stack").remove();
     });
 }
 
+function animateBackHome() {
+    //$("#gallerySection").addClass("hiddenOpacity");
+    $("#gallerySection").css("opacity",0);
+    $("#gallerySection").removeClass("hidden");
+    $("#animateImageOnOpen").width($(".currentlyViewingImage").width());
+    $("#animateImageOnOpen").height($(".currentlyViewingImage").height());
+    $("#animateImageOnOpen").css("top",$(".currentlyViewingImage").offset().top);
+    $("#animateImageOnOpen").css("left",$(".currentlyViewingImage").offset().left);
+    setTimeout(function(){
+        $("#gallerySection").css("opacity",1);
+    }, 500);
+    setTimeout(function(){
+        $("#animateImageOnOpen").addClass("hidden");
+        $("#animateImageOnOpen").removeClass("enableSizeAnimation");
+    }, 1000);
+    //$("#animateImageOnOpen").addClass("enableSizeAnimation");
+    //openedFromGallery = true;
+}
+
 function openGallerySection() {
     console.log("lolb");
     var width = 1490;
@@ -691,14 +753,52 @@ function openGallerySection() {
     /*win.resizeTo(width,height);*/
     //win.x = Math.floor(((screen.width/2) - (width/2)));
     console.log("window resized");
+
+    if (openedFromGallery) {
+        openedFromGallery = false;
+        //$(imageElement).addClass("currentlyViewingImage");
+    //$("#animateImageOnOpen").attr("src",$(imageElement).attr("src"));
+    
+
+    if ($(".switchBackTo").hasClass("active")) {
+        $("#animateImageOnOpen").removeClass("hidden");
+    //$("#innerFeaturedSlides > .active").removeClass("active");
+    //$(".currentlyViewingImage").parent().addClass("active");
     $("#mainView").addClass("hidden");
-    $("#gallerySection").removeClass("hidden");
-    loadAllPhotosSection();
-    var width = 1490;
+        animateBackHome();
+    } else {
+        //$("#innerPhotosSlides > .active").removeClass("avtive");
+        //$(".switchBackTo").addClass("active")
+        //setTimeout(function(){ animateBackHome(); }, 1000);
+        if (slideBackToIndex != -1) {
+            //$('#innerPhotosSlides').carousel(slideBackToIndex);
+            console.log("clicking thisL ",$("li[data-slide-to="+slideBackToIndex+"]"));
+            $("li[data-slide-to="+slideBackToIndex+"]").click(); //Why click instead of $('#innerPhotosSlides').carousel(slideBackToIndex);? Because it's animated.
+            slideBackToIndex = -1;
+            setTimeout(function(){ 
+                $("#animateImageOnOpen").removeClass("hidden");
+                $("#mainView").addClass("hidden");
+                animateBackHome();
+            }, 500);
+        } else {
+            $("#animateImageOnOpen").removeClass("hidden");
+            $("#mainView").addClass("hidden");
+            animateBackHome();
+        }
+    }
+    
+    } else {
+        $("#mainView").addClass("hidden");
+        $("#gallerySection").removeClass("hidden");
+        loadAllPhotosSection();
+        var width = 1490;
         var height = 860;
         //win.resizeTo(width,height);
         
         App.ready({width: width, height:height});
+    }
+
+    
         
 	//win.moveTo(newX,newY);
 }
@@ -712,7 +812,7 @@ if (App.argv != null) {
 	} else {
 	if (App.argv[0] == "--screnshot-extern\0") {
 		console.log("it's a screenshot");
-		$(".carousel-indicators").addClass("hiddenOpacity");
+		$("#mainView  .carousel-indicators").addClass("hiddenOpacity");
 		$("#topToolbar").addClass("hiddenOpacity");
 		$(App.close_button).removeClass("hiddenOpacity");
 		$(App.maximize_button).addClass("hidden"); //So that user doesn't accidentally click it in mini screenshot view mode
@@ -733,6 +833,7 @@ if (App.argv != null) {
     //App.ready({width: width, height:height});
     openGallerySection();
 }
+
 
 
 
