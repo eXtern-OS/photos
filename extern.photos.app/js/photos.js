@@ -7,7 +7,25 @@ var wzoom;
 var slideShowInterval;
 var intervalDuration = 5000;
 var openedFromGallery = false;
-//win.showDevTools();
+var isAlbumView = false;
+win.showDevTools();
+//win.zoomLevel = 1.25; //FIXME: remoe, testing scailing capabilities
+var find = require('find');
+var gui = require('nw.gui');
+var selectedAlbum = -1;
+/*Get the thumbnail directory ready*/
+var thumb_cache = gui.App.dataPath+"/thumbnails/videos/";
+if (!fs.existsSync(gui.App.dataPath+"/thumbnails/")){
+    fs.mkdirSync(gui.App.dataPath+"/thumbnails/");
+}
+
+if (!fs.existsSync(thumb_cache)){
+    fs.mkdirSync(thumb_cache);
+}
+var libraryLocation = process.env['HOME']+"/Pictures";
+
+
+//FIXME: TODO: Clean up this code, add comments etc....
 
 function toggleSlideshow() {
     //$("#innerPhotosSlides").carousel('pause');
@@ -209,6 +227,8 @@ function validateImage(input,callback,customSelectFile){
 
 
         image.src = "file://"+input; //"data:image/png;base64"+resizedImageBuf.toString('base64');
+
+       
 
         //lastImage
                /* if (input == lastImage) {
@@ -469,7 +489,7 @@ if (files.length != 1) {
         if (i == 0)
             validateImage(files[i],addImage,true);
         else
-            validateImage(files[i],addImage,false);
+            validateImage(files[i],addImage,false); 
     }
 
 } else {
@@ -589,24 +609,79 @@ screenhsotView = false; //Prevent going into mini mode
     
 }
 
-function openImage(imageElement) {
+function openImage(imageElement,isThumb) {
+
+    if (isThumb)
+        imageElement = $(imageElement).find( "img" );
     
     $('#mainView .carousel-indicators').empty();
     $("#innerPhotosSlides").empty();
     console.log("imageElement: ",$(imageElement).offset());
     $(".currentlyViewingImage").removeClass("currentlyViewingImage");
     $(imageElement).addClass("currentlyViewingImage");
-    $("#animateImageOnOpen").attr("src",$(imageElement).attr("src"));
+    $("#animateImageOnOpen").attr("src","file://"+$(imageElement).attr("img-src"));
     $("#animateImageOnOpen").removeClass("hidden");
     $("#animateImageOnOpen").width($(imageElement).width());
     $("#animateImageOnOpen").height($(imageElement).height());
     $("#animateImageOnOpen").css("top",$(imageElement).offset().top);
     $("#animateImageOnOpen").css("left",$(imageElement).offset().left);
-    $("#animateImageOnOpen").addClass("enableSizeAnimation");
-    openedFromGallery = true;
-    var files = [$(imageElement).attr("img-src")];
-    App.onOpenFiles(files); //FIXME: come here
+    setTimeout(function(){
+        $("#animateImageOnOpen").addClass("enableSizeAnimation");
+        openedFromGallery = true;
+        var files = [$(imageElement).attr("img-src")];
+        App.onOpenFiles(files); //FIXME: come here
+    }, 50);
+    
 
+}
+
+function openAlbum(albumElement,albumPos) {
+    selectedAlbum = albumPos; 
+    $("#albumView").empty();
+
+    var albumDir = albums[albumPos];
+    isAlbumView = true;
+
+    //console.log("children: ",$(albumElement).children());
+    if (albumElement != null) {
+        $(".thumbPreview").removeClass("enableSizeAnimation");
+        $("#albumView").addClass("hiddenOpacity");
+        var imgThumbs = $(albumElement).children();
+        for (var i = 0; i < imgThumbs.length; i++) {
+            $("#animateImageThumbnail"+(i+1)).attr("src",$(imgThumbs[i]).attr("src"));
+            $("#animateImageThumbnail"+(i+1)).attr("full-src",$(imgThumbs[i]).attr("full-src"));
+            $("#animateImageThumbnail"+(i+1)).width($(imgThumbs[i]).width());
+            $("#animateImageThumbnail"+(i+1)).height($(imgThumbs[i]).height());
+            $("#animateImageThumbnail"+(i+1)).css("top",$(imgThumbs[i]).offset().top);
+            $("#animateImageThumbnail"+(i+1)).css("left",$(imgThumbs[i]).offset().left);
+            $("#animateImageThumbnail"+(i+1)).removeClass("hidden");
+        }
+        $("#allAlbumsView").addClass("hidden");
+        $("#albumView").removeClass("hidden");
+        $(".thumbPreview").addClass("enableSizeAnimation");
+    }
+    
+
+    loadAllPhotosSection(albumDir.path);
+
+   /* imageToAdd = "/home/extern/Pictures/landscape2.jpeg";
+    $("#albumView").append('<a href="#" class="photo-stack single-photo photo-thumbnail">'+
+        '<img src="file://'+imageToAdd+'">'+
+        '<p class="thumbnailLabel">Side Slide</p>'+
+        '</a>');
+
+        $("#albumView").append('<a href="#" class="photo-stack single-photo photo-thumbnail">'+
+        '<img src="file://'+imageToAdd+'">'+
+        '<p class="thumbnailLabel">Side Slide</p>'+
+        '</a>');
+
+        $("#albumView").append('<a href="#" class="photo-stack single-photo photo-thumbnail">'+
+        '<img src="file://'+imageToAdd+'">'+
+        '<p class="thumbnailLabel">Side Slide</p>'+
+        '</a>');*/
+
+    
+        
 }
 
 function openEditor() {
@@ -624,8 +699,8 @@ function openEditor() {
 }
 
 function addImageToLibrary(imageToAdd) {
-    var pos = $("#innerFeaturedSlides").children().length;
-    if (pos < 3) {
+    var pos = $("#innerFeaturedSlides").children().length; //if (!isAlbumView)
+    if (pos < 3 && !isAlbumView) {
         if (pos == 0) {
             $("#innerFeaturedSlides").append('<a href="#" class="item featured-item active"><img img-src="'+imageToAdd+'" onclick="openImage(this)" src="file://'+imageToAdd+'" alt="Ismage"></a>');
             $(".carousel-indicators").append('<li data-target="#featured-photos-carousel" data-slide-to="'+pos+'" class="imgIndicators active"></li>');
@@ -637,6 +712,70 @@ function addImageToLibrary(imageToAdd) {
     //$(".carousel-indicators").append('<li data-target="#featured-photos-carousel" data-slide-to="'+(currentPos+1)+'" class="imgIndicators"></li>');
     
 
+    } else if (isAlbumView) {
+        let imgName = path.basename(imageToAdd);
+        let imgMainSrc = imageToAdd.replaceAll("//","/");
+        $("#albumView").append('<a href="#" class="single-photo photo-thumbnail hidden" onclick="openImage(this,true)">'+
+            '<img img-src="'+imgMainSrc+'" src="">'+
+            '<p class="thumbnailLabel">'+imgName+'</p>'+
+        '</a>');
+                        
+                        if (fs.existsSync(thumb_cache+imgName+'-[image].png')) {
+                            $('img[img-src="'+imgMainSrc+'"]').attr("src","file://"+thumb_cache+imgName+'-[image].png');
+                            $('img[img-src="'+imgMainSrc+'"]').parent().removeClass("hidden");
+                            if (lastImage == imageToAdd) {
+                                for (var i = 0; i < 3; i++) {
+                                    let imgMainSrc = $("#animateImageThumbnail"+(i+1)).attr("full-src");
+                                    if (!$("#animateImageThumbnail"+(i+1)).hasClass("hidden")) {
+                                        $("#animateImageThumbnail"+(i+1)).width($('img[img-src="'+imgMainSrc+'"]').width());
+                                        $("#animateImageThumbnail"+(i+1)).height($('img[img-src="'+imgMainSrc+'"]').height());
+                                        $("#animateImageThumbnail"+(i+1)).css("top",$('img[img-src="'+imgMainSrc+'"]').offset().top);
+                                        $("#animateImageThumbnail"+(i+1)).css("left",$('img[img-src="'+imgMainSrc+'"]').offset().left);
+                                    }
+                                }
+                                setTimeout(function(){ $("#albumView").removeClass("hiddenOpacity"); }, 500);
+                                setTimeout(function(){ $(".thumbPreview").removeClass("enableSizeAnimation"); $(".thumbPreview").addClass("hidden"); }, 800);
+                            }
+                        } else {
+                            let childProcess = require('child_process');
+                            let spawn = childProcess.spawn;
+                            let child = spawn('convert', [imgMainSrc,'-thumbnail','300',thumb_cache+imgName+'-[image].png',]);
+                            
+                            child.on('error', function () {
+                                console.log("Failed to start child.");
+                            });
+                            
+                            child.on('close', function (code) {
+                                console.log('Child process exited with code ' + code);
+                            });
+                            
+                            child.stdout.on('end', function () {
+                                console.log('Finished collecting data chunks: ',imgName);
+                                var stats = fs.statSync(thumb_cache+imgName+'-[image].png')
+                                
+                                var fileSizeInBytes = stats["size"];
+                                
+                                if (fileSizeInBytes != 0) {
+                                    $('img[img-src="'+imgMainSrc+'"]').attr("src","file://"+thumb_cache+imgName+'-[image].png');
+                                    $('img[img-src="'+imgMainSrc+'"]').parent().removeClass("hidden");
+                                    if (lastImage == imageToAdd) {
+                                        for (var i = 0; i < 3; i++) {
+                                            let imgMainSrc = $("#animateImageThumbnail"+(i+1)).attr("full-src");
+                                            if (!$("#animateImageThumbnail"+(i+1)).hasClass("hidden")) {
+                                                $("#animateImageThumbnail"+(i+1)).width($('img[img-src="'+imgMainSrc+'"]').width());
+                                                $("#animateImageThumbnail"+(i+1)).height($('img[img-src="'+imgMainSrc+'"]').height());
+                                                $("#animateImageThumbnail"+(i+1)).css("top",$('img[img-src="'+imgMainSrc+'"]').offset().top);
+                                                $("#animateImageThumbnail"+(i+1)).css("left",$('img[img-src="'+imgMainSrc+'"]').offset().left);
+                                            }
+                                        }
+                                        setTimeout(function(){ $("#albumView").removeClass("hiddenOpacity"); }, 500);
+                                        setTimeout(function(){ $(".thumbPreview").removeClass("enableSizeAnimation"); $(".thumbPreview").addClass("hidden"); }, 800);
+                                    }
+                                }
+                            });
+                             //$("#albumList"+i+" .albumThumbnail"+j).attr("src","file://"+albums[i].images[j]);
+                    }
+        
     } else {
         if ($("#innerFeaturedSlides").children().length == 4) {
             $("#innerFeaturedSlides").carousel({
@@ -645,26 +784,36 @@ function addImageToLibrary(imageToAdd) {
             //$("#innerFeaturedSlides").carousel('pause');
         }
 
+        var imgName = path.basename(imageToAdd);
+
         //+process.env['HOME']
 
-        $("#allPhotosMain").append('<a href="#" class="photo-stack single-photo photo-thumbnail">'+
+        /*if (fs.existsSync(thumb_cache+file.name+'-[image].png')) {
+var stats = fs.statSync(thumb_cache+file.name+'-[image].png');
+	file.icon = "file://"+thumb_cache+file.name+'-[image].png';
+	//$( "div[fileid='"+file.parentID+"'] > .folder-icon > img:nth-child("+(file.filePos+1)+")" ).attr( "src", file.icon);
+	$( "div[fileid='"+file.parentID+"'] > .folder-icon > img:nth-child("+(file.filePos+1)+")" ).addClass( "media-icon");
+	//$("#"+file.id).find("img").attr("src",file.icon);
+        }*/
+
+        $("#OtherRecentImages").append('<a href="#" class="single-photo photo-thumbnail">'+
                         '<img src="file://'+imageToAdd+'">'+
                             
 				
-			'<p class="albumLabel">Side Slide</p>'+
+			'<p class="thumbnailLabel">'+imgName+'</p>'+
                     '</a>');
 
-        $("#allPhotosMain").append('<a href="#" class="photo-stack photo-thumbnail">'+
+        $("#OtherRecentImages").append('<a href="#" class="photo-stack photo-thumbnail">'+
                         '<div>'+
                             
-				'<figure class="stack stack-spread notActive"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/body of water.jpeg-[image].png" alt="img01"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/cristina-gottardi.jpg-[image].png" alt="img02"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/landscape2.jpeg-[image].png" alt="img03"></figure>'+
+				'<figure class="stack stack-spread notActive" onclick="openAlbum(this,0)"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/body of water.jpeg-[image].png" alt="img01"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/cristina-gottardi.jpg-[image].png" alt="img02"><img src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/landscape2.jpeg-[image].png" alt="img03"></figure>'+
 
                         '</div>'+
 			'<p class="albumLabel">Side Slide</p>'+
                     '</a>');
 
                     if ($(".photo-stack").length == 2) {
-                        $("#allPhotosMain").append("<br>");
+                        //$("#OtherRecentImages").append("<br>");
                     }
     }
 
@@ -675,11 +824,179 @@ function addImageToLibrary(imageToAdd) {
 var albums = [];
 var lastImage = "";
 
-function loadAllPhotosSection() {
-var fullFilePath = process.env['HOME']+"/Pictures";
-$(".photo-stack").remove();
+
+
+function loadAlbums() {
+    for (var i = 0; i < albums.length; i++) {
+        fs.readdir(albums[i].path, function(error, files) {
+        if (error) {
+            //console.log(error);
+            console.log(error);
+            return;
+        }
+
+        var filesLength = files.length; //Default for when opening an album
+
+        if (files.length > 10)
+            var filesLength = 3;
+        
+        
+
+        for (var i = 0; i < filesLength; i++) {
+            
+
+            if (fs.lstatSync(fullFilePath+"/"+files[i]).isDirectory()) {
+                //might do a recursive search and cache later?
+            } else {
+                
+                validateImage(fullFilePath+"/"+files[i],addImageToLibrary,true);
+                
+                
+            }
+            
+
+
+        }
+        //App.ready();
+
+
+    
+    });
+    }
+}
+
+var allImages = [];
+
+
+
+function loadAllPhotosSection(loadFromPath) {
+    var fullFilePath = libraryLocation;
+    if (isAlbumView)
+        fullFilePath = libraryLocation+"/"+loadFromPath;
+        
+    $(".photo-stack").remove();
     $(".carousel-indicators").empty();
     $("#innerFeaturedSlides").empty();
+
+    if (!isAlbumView) {
+
+    find.file(/\.jpg|.jpeg|.png|$/,fullFilePath, function(files) {
+        console.log("found images: ",files);
+
+        for (var i = 0; i < files.length; i++) {
+            var imgDir = files[i].replace(fullFilePath,"");
+
+            //console.log("imgDir: ",imgDir);
+            if (imgDir != "" && imgDir.replace(/[^/]/g, "").length > 1) {
+                var albumPath = imgDir.substring(0,imgDir.lastIndexOf("/")+1);
+                var albumExists = albums.filter(function (el) {
+                    return el.path == albumPath;
+                });
+
+                console.log("imgDir: ",albumExists);
+
+                if (albumExists.length == 0)
+                    albums.push({path: albumPath, images: [files[i]]});
+                else {
+                    if (albumExists[0].images.length < 3) {
+                        albumExists[0].images.push(files[i])
+                    }
+                }
+
+               // console.log("albumExists.length: ",albumExists.length);
+            
+            }
+                
+            
+            allImages.push({path: files[i]});
+            try {
+                allImages[i].stats = fs.statSync(files[i]);
+            } catch {
+                allImages[i].statsFailed = true;
+            }
+        }
+
+        console.log("allImages pre-sorted: ",allImages[0].path);
+
+        allImages.sort(function(a,b){return b.stats.mtime - a.stats.mtime});
+
+        console.log("allImages: ",allImages);
+
+         var filesLength = allImages.length; //Default for when opening an album
+
+        if (allImages.length > 10)
+            var filesLength = 10;
+
+
+        for (var i = 0; i < filesLength; i++) {
+            filesAdded++;
+            if (i == (filesLength-1)) {
+                    lastImage = allImages[i].path;
+                }
+                validateImage(allImages[i].path,addImageToLibrary,true);
+        }
+
+        if (albums.length != 0) {
+            for (var i = 0; i < albums.length; i++) {
+                if (albums[i].images.length != 0) {
+                    $("#albumsList").append('<a id="albumList'+i+'" href="#" class="photo-stack photo-thumbnail">'+
+                        '<div>'+
+                            
+				'<figure class="stack stack-spread notActive" onclick="openAlbum(this,0)"><img class="albumThumbnail0" src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/body of water.jpeg-[image].png" alt="img01"><img class="albumThumbnail1" src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/cristina-gottardi.jpg-[image].png" alt="img02"><img class="albumThumbnail2" src="file:///usr/eXtern/systemX/Shared/CoreSetup/thumbnails/videos/landscape2.jpeg-[image].png" alt="img03"></figure>'+
+
+                        '</div>'+
+			'<p class="albumLabel">'+path.basename(albums[i].path)+'</p>'+
+                    '</a>');
+                    for (var j = 0; j < albums[i].images.length; j++) {
+                        $("#albumList"+i+" .albumThumbnail"+j).attr("full-src",albums[i].images[j]);
+                        let imgName = path.basename(albums[i].images[j])
+                        if (fs.existsSync(thumb_cache+imgName+'-[image].png')) {
+                            //var stats = fs.statSync(thumb_cache+file.name+'-[image].png'); //full-src
+                            $("#albumList"+i+" .albumThumbnail"+j).attr("src","file://"+thumb_cache+imgName+'-[image].png');
+                        } else {
+
+                            let thumbnailDiv = "#albumList"+i+" .albumThumbnail"+j;
+
+                            let childProcess = require('child_process');
+                            let spawn = childProcess.spawn;
+                            let child = spawn('convert', [albums[i].images[j],'-thumbnail','300',thumb_cache+imgName+'-[image].png',]);
+                            
+                            child.on('error', function () {
+                                console.log("Failed to start child.");
+                            });
+                            
+                            child.on('close', function (code) {
+                                console.log('Child process exited with code ' + code);
+                            });
+                            
+                            child.stdout.on('end', function () {
+                                console.log('Finished collecting data chunks: ',imgName);
+                                var stats = fs.statSync(thumb_cache+imgName+'-[image].png')
+                                
+                                var fileSizeInBytes = stats["size"];
+                                
+                                if (fileSizeInBytes != 0) {
+                                    $(thumbnailDiv).attr("src","file://"+thumb_cache+imgName+'-[image].png');
+                                }
+                            });
+                             //$("#albumList"+i+" .albumThumbnail"+j).attr("src","file://"+albums[i].images[j]);
+                        }
+                        
+                        if (j == 2)
+                            break;
+                    }
+                }
+            }
+
+            $("#OtherAlbums").removeClass("hidden");
+        }
+
+        console.log("albums: ",albums);
+    });
+
+    //console.log("fullFilePath: ",fullFilePath);
+
+    } else {
 
     fs.readdir(fullFilePath, function(error, files) {
         if (error) {
@@ -688,22 +1005,23 @@ $(".photo-stack").remove();
             return;
         }
 
-        if (files.length > 10)
-            var filesLength = 10;
-        else
-            var filesLength = files.length;
+        var filesLength = files.length; //Default for when opening an album
+
+        if (loadFromPath == null) {
+            if (files.length > 10)
+                var filesLength = 10;
+        }
+        
 
         for (var i = 0; i < filesLength; i++) {
-            /*var fileToProcess = {
-                name: files[i],
-                path: fullFilePath+"/"+files[i],
-                type: "blank",
-                filePos: filesAdded
-            }*/
-            filesAdded++;
+            
+            if (!isAlbumView)
+                filesAdded++;
 
             if (fs.lstatSync(fullFilePath+"/"+files[i]).isDirectory()) {
-                albums.push({path: fullFilePath+"/"+files[i]});
+                if (!isAlbumView)
+                    albums.push({path: fullFilePath+"/"+files[i]});
+                //console.log("albums: ",albums);
             } else {
                 if (i == (filesLength-1)) {
                     lastImage = fullFilePath+"/"+files[i];
@@ -725,6 +1043,8 @@ $(".photo-stack").remove();
 
     
     });
+
+    }
 }
 
 function animateBackHome() {
@@ -741,14 +1061,12 @@ function animateBackHome() {
     setTimeout(function(){
         $("#animateImageOnOpen").addClass("hidden");
         $("#animateImageOnOpen").removeClass("enableSizeAnimation");
-    }, 1000);
-    //$("#animateImageOnOpen").addClass("enableSizeAnimation");
-    //openedFromGallery = true;
+    }, 700);
 }
 
 function openGallerySection() {
     console.log("lolb");
-    var width = 1490;
+    var width = 1522;
     var height = 860;
     /*win.resizeTo(width,height);*/
     //win.x = Math.floor(((screen.width/2) - (width/2)));
@@ -791,7 +1109,7 @@ function openGallerySection() {
         $("#mainView").addClass("hidden");
         $("#gallerySection").removeClass("hidden");
         loadAllPhotosSection();
-        var width = 1490;
+        var width = 1522;
         var height = 860;
         //win.resizeTo(width,height);
         

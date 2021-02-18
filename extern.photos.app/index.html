@@ -167,7 +167,8 @@
   <div class="col-md-10">
     <div id="allAlbums">
       <div id="allPhotosMain" class="row">
-        <div class="col-md-9">
+        <div id="allAlbumsView">
+        <div id="featuredPhotos" class="col-md-9">
           <!--featured-photos-carousel-->
           <div id="featured-photos-carousel" class="carousel slide" data-interval="false">
             <!-- Indicators -->
@@ -189,13 +190,28 @@
                                         <i class="icon">&#61815;</i>
                                     </a>-->
                                 </div>
+
+          <div id="OtherRecentImages"></div>
+          <div id="OtherAlbums" class="hidden">
+            <h3 class="block-title">Albums</h3>
+            <div id="albumsList"></div>
+          </div>
         </div>
+
+        
         <!--<div class="col-md-3">-->
 
 
                     
         <!--</div>-->
 
+        </div>
+
+        <div id="albumView" class="hidden hiddenOpacity">
+
+        </div>
+
+        
       </div>
     </div>
   </div>
@@ -251,7 +267,14 @@
 
         </section>
 
-        <img id="animateImageOnOpen" src="" class="hidden">
+        <img id="animateImageOnOpen" src="" class="absoluteImg hidden">
+
+        
+        <img id="animateImageThumbnail1" src="" class="thumbPreview absoluteImg hidden">
+        <img id="animateImageThumbnail2" src="" class="thumbPreview absoluteImg hidden">
+        <img id="animateImageThumbnail3" src="" class="thumbPreview absoluteImg hidden">
+        
+        
         
         <!-- Javascript Libraries -->
         <!-- jQuery -->

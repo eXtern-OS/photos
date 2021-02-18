@@ -23,6 +23,10 @@ embed {
     /*width: 100%;*/
 }
 
+.thumbPreview {
+    box-shadow: 0 0 23px rgb(0 0 0 / 58%);
+}
+
 #copyButton {
     margin-top: 10px;
     text-shadow: none;
@@ -78,7 +82,7 @@ embed {
     margin-right: 30px;
 }
 
-#animateImageOnOpen {
+.absoluteImg {
     position: absolute;
 }
 
@@ -86,7 +90,12 @@ embed {
     -webkit-transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s;
 }
 
-.animatedOpacity, #gallerySection {
+#albumView {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.animatedOpacity, #gallerySection, #albumView {
     -webkit-transition: opacity 0.5s;
 }
 
@@ -102,7 +111,18 @@ embed {
 }
 
 .featured-item {
-    height: fit-content !important;
+    /*height: fit-content !important;*/
+}
+
+#featuredPhotos {
+    /* max-width: 880px; */
+    width: calc(100% - 10px);
+    min-height: 531px;
+    height: 40%;
+    background: #000000a6;
+    margin-left: 7px;
+    border-radius: 10px;
+    /* margin-right: 20px; */
 }
 
 .carousel-inner>.featured-item>img {
@@ -229,15 +249,24 @@ margin: auto;
 
 .photo-stack {
     display: inline-block;
-    margin-bottom: 40px;
+    /*margin-bottom: 40px;*/
     margin-top: 30px;
-    margin-right: 60px;
-    width: 20%;
+    margin-right: 70px;
+    width: 250px;
+}
+
+.single-photo {
+    display: inline-block;
+    /*margin-bottom: 40px;*/
+    margin-top: 30px;
+    margin-right: 10px;
+    width: 300px;
+    max-height: 233px;
 }
 
 .single-photo > img {
-    margin-left: 20px;
-    max-width: 110%;
+    /*margin-left: 20px;*/
+    max-width: 100%;
     box-shadow: 0 0 23px rgb(0 0 0 / 58%);
 }
 
@@ -256,10 +285,22 @@ margin: auto;
     text-align: center;
 }
 
+#albumView {
+    position: absolute;
+    top: 0;
+}
+
+.thumbnailLabel {
+    font-size: 16px;
+    margin-top: 20px;
+    text-align: center;
+}
+
 .stack img {
     box-shadow: 0 0 23px rgb(0 0 0 / 58%);
     -webkit-transition: all 0.3s, box-shadow 0.5s !important;
     transition: all 0.3s, box-shadow 0.5s !important;
+    max-height: 160px;
 }
 
 p {
